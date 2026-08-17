@@ -1,0 +1,10 @@
+# Contains your ESPN cookies — never commit this.
+config.json
+
+# Cached API data and warmed hype packets.
+data/
+
+__pycache__/
+*.pyc
+.venv/
+venv/

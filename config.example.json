@@ -1,0 +1,36 @@
+{
+  "_comment": "Copy this file to config.json and fill in your league. 'source' picks which one is used.",
+
+  "source": "sleeper",
+  "replay_existing": false,
+
+  "sleeper": {
+    "_comment": "Either works. draft_id wins if both are set. You can paste a full Sleeper draft URL as draft_id.",
+    "draft_id": "",
+    "league_id": ""
+  },
+
+  "espn": {
+    "_comment": "league_id is the number in your ESPN league URL. Public leagues need no cookies.",
+    "league_id": "",
+    "season": 2026,
+
+    "_cookies": [
+      "PRIVATE LEAGUES ONLY. To get these:",
+      "1. Open fantasy.espn.com in Chrome and log in.",
+      "2. F12 -> Application tab -> Storage -> Cookies -> https://fantasy.espn.com",
+      "3. Copy the 'espn_s2' value (long) and the 'SWID' value (in curly braces).",
+      "These expire every so often. If ESPN polling starts failing with 401, re-grab them."
+    ],
+    "espn_s2": "",
+    "swid": ""
+  },
+
+  "demo": {
+    "_comment": "Replays a finished draft so you can test without a live one. Defaults to a real completed 2025 ESPN league.",
+    "espn_league_id": "899513",
+    "espn_season": 2025,
+    "sleeper_draft_id": "",
+    "interval": 10.0
+  }
+}

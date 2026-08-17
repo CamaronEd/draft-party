@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Draft Party</title>
+<link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+
+<!-- One click here unlocks autoplay-with-audio for the whole session. -->
+<div id="splash" class="splash">
+  <div class="splash-inner">
+    <div class="splash-kicker">Fantasy Draft Party</div>
+    <h1 class="splash-title">ON THE CLOCK</h1>
+    <button id="start-btn" class="start-btn">TAP TO START</button>
+    <div class="splash-note">Enables sound &amp; fullscreen · then it runs itself</div>
+  </div>
+</div>
+
+<!-- Idle board between picks -->
+<div id="idle" class="idle hidden">
+  <div class="idle-head">
+    <div class="pulse"></div>
+    <span id="idle-status">Waiting for the next pick…</span>
+  </div>
+  <h2 class="idle-title">DRAFT PARTY</h2>
+  <div id="idle-recent" class="idle-recent"></div>
+</div>
+
+<!-- The hype moment -->
+<div id="stage" class="stage hidden">
+  <div id="pick-banner" class="pick-banner">
+    <span id="pick-label" class="pick-label">1.01</span>
+    <span id="pick-team" class="pick-team">Team</span>
+  </div>
+
+  <div id="card" class="card">
+    <div class="card-photo-wrap">
+      <img id="card-photo" class="card-photo" alt="">
+      <img id="card-logo" class="card-logo" alt="">
+    </div>
+    <div class="card-info">
+      <div id="card-pos" class="card-pos">WR</div>
+      <h1 id="card-name" class="card-name">Player Name</h1>
+      <div id="card-meta" class="card-meta">CIN · LSU</div>
+      <div id="card-stats" class="card-stats"></div>
+    </div>
+  </div>
+
+  <div id="video-wrap" class="video-wrap">
+    <div id="player"></div>
+    <!-- Hides YouTube's own title/channel bar, which it draws over the video. -->
+    <div class="video-scrim"></div>
+    <div class="video-overlay">
+      <div id="video-name" class="video-name"></div>
+      <div id="video-sub" class="video-sub"></div>
+    </div>
+  </div>
+
+  <div id="queue-badge" class="queue-badge hidden"></div>
+</div>
+
+<div id="toast" class="toast hidden"></div>
+
+<script src="https://www.youtube.com/iframe_api"></script>
+<script src="/static/app.js"></script>
+</body>
+</html>
