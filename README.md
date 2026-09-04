@@ -11,12 +11,16 @@ their photo and 2025 stats. Fully automatic once started.
 
 ## Setup
 
+Requires Python 3.10+.
+
 ```bash
-pip install fastapi "uvicorn[standard]" httpx
+pip install -r requirements.txt
 pip install playwright        # optional but strongly recommended, see below
 ```
 
 Copy `config.example.json` to `config.json` and fill in your league.
+`config.json` is gitignored — it can hold ESPN login cookies, so it's never
+committed. See `directions.txt` for a fuller step-by-step walkthrough.
 
 ### Sleeper
 

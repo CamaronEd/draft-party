@@ -1,78 +1,109 @@
+Fantasy Draft Party — Setup
+
+Requirements: Python 3.10 or newer.
+
+Step 0 — Install and configure
+Open a terminal in the folder you cloned this into, then run:
+
+  pip install -r requirements.txt
+  pip install playwright        # optional but strongly recommended — see README "Why prewarm matters"
+
+Then copy the config template and fill it in:
+
+  Windows (PowerShell):  copy config.example.json config.json
+  Mac/Linux:              cp config.example.json config.json
+
+Everything below edits that new config.json — the original config.example.json
+stays untouched as a template. config.json is listed in .gitignore on purpose
+(it can hold ESPN login cookies), so it's never committed or pushed.
+
 Step 1 — Find your league ID
 If you use ESPN: open your league in a browser. The URL looks like:
 
-
 https://fantasy.espn.com/football/league?leagueId=123456789
                                                   ^^^^^^^^^ this number
-If you use Sleeper: open your draft. The URL looks like:
 
+If you use Sleeper: open your draft. The URL looks like:
 
 https://sleeper.com/draft/nfl/1234567890123456789
                               ^^^^^^^^^^^^^^^^^^^ this number
+
 (You can paste the whole URL — it extracts the ID itself.)
 
 Step 2 — Edit config.json
-Open C:\Users\calua\draft-party\config.json.
-
 For Sleeper, change these two things:
-
 
   "source": "sleeper",
   "sleeper": {
     "draft_id": "1234567890123456789",
+
 That's it — Sleeper needs no login.
 
 For ESPN, change these:
-
 
   "source": "espn",
   "espn": {
     "league_id": "123456789",
     "season": 2026,
+
 If your ESPN league is private (most are), you also need two cookies:
 
-Log into fantasy.espn.com in Chrome or Edge
-Press F12 → Application tab → left sidebar: Cookies → https://fantasy.espn.com
-Find espn_s2 — copy the long value → paste into "espn_s2"
-Find SWID — copy it including the { } braces → paste into "swid"
-Step 3 — Test that it connects (do this today, not on draft day)
+  Log into fantasy.espn.com in Chrome or Edge
+  Press F12 -> Application tab -> left sidebar: Cookies -> https://fantasy.espn.com
+  Find espn_s2 — copy the long value -> paste into "espn_s2"
+  Find SWID — copy it including the { } braces -> paste into "swid"
 
-cd C:\Users\calua\draft-party
-python app.py --replay
+Step 3 — Test that it connects (do this today, not on draft day)
+Run, from the project folder:
+
+  python app.py --replay
+
 --replay shows picks that already exist. Watch the terminal:
 
-Good: you see your real team names and Watching ESPN draft / Watching SLEEPER draft
-Bad — 401 error: your ESPN cookies are wrong or expired, redo Step 2
-Nothing happens: that's normal if your draft hasn't happened yet — it just means there are no picks to replay. The absence of errors is the pass condition.
+  Good: you see your real team names and "Watching ESPN draft" / "Watching SLEEPER draft"
+  Bad — 401 error: your ESPN cookies are wrong or expired, redo Step 2
+  Nothing happens: that's normal if your draft hasn't happened yet — it just
+    means there are no picks to replay. The absence of errors is the pass condition.
+
 Press Ctrl+C to stop.
 
 Step 4 — The night before your draft
 
-python prewarm.py --top 300
-Do not skip this. It takes a while (maybe 30–60 min) and you can walk away. Without it, roughly two thirds of picks show a stat card instead of a video.
+  python prewarm.py --top 300
 
-When it finishes it prints something like 287/300 players have a playable clip. Anyone missing just gets a stat card, which looks fine.
+Do not skip this. It takes a while (maybe 30-60 min) and you can walk away.
+Without it, roughly two thirds of picks show a stat card instead of a video.
+
+When it finishes it prints something like "287/300 players have a playable
+clip." Anyone missing just gets a stat card, which looks fine.
 
 Optional, an hour before the draft — fills in anyone that came back empty:
 
+  python prewarm.py --top 300 --missing
 
-python prewarm.py --top 300 --missing
 Step 5 — Draft day
+From the project folder:
 
-cd C:\Users\calua\draft-party
-python app.py
+  python app.py
+
 Leave that terminal window open and alone. Then:
 
-Open a browser on the TV to http://localhost:8000
-Click TAP TO START once
-That single click is what allows sound. After it, don't touch anything — it runs itself for the whole draft.
+  Open a browser on the TV to http://localhost:8000
+  Click TAP TO START once
 
-To use a different device as the TV (tablet, laptop, Fire Stick browser): run ipconfig, find your IPv4 address, and open http://THAT-IP:8000 on that device instead.
+That single click is what allows sound. After it, don't touch anything — it
+runs itself for the whole draft.
+
+To use a different device as the TV (tablet, laptop, Fire Stick browser): find
+your computer's local IP address (Windows: run `ipconfig` and look for IPv4;
+Mac/Linux: `ifconfig` or `ip addr`) and open http://THAT-IP:8000 on that
+device instead. Both devices need to be on the same network.
 
 If something goes wrong mid-draft
-Problem	Fix
-A clip is bad or boring	press →
-Too loud	press M
-Want to see the last pick again	press R
-Screen froze / went blank	refresh the browser, click TAP TO START again — it reconnects and keeps going
-One thing I'd like to confirm for you: if you're using Sleeper, paste me your draft ID (a finished mock draft works too) and I'll verify that path end-to-end before your draft. ESPN I already tested against a real league; Sleeper I built to spec but couldn't test live without an ID.
+
+  Problem                          Fix
+  A clip is bad or boring          press ->
+  Too loud                         press M
+  Want to see the last pick again  press R
+  Screen froze / went blank        refresh the browser, click TAP TO START
+                                    again — it reconnects and keeps going

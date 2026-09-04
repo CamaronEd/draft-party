@@ -310,6 +310,14 @@ def main() -> None:
     global CLI_ARGS
     CLI_ARGS = parser.parse_args()
 
+    # Checked here (before uvicorn ever starts) rather than left to
+    # load_config() alone: sys.exit() from inside the ASGI lifespan still
+    # prints a full traceback on the way out, which reads like a crash to
+    # someone setting this up for the first time.
+    if not CONFIG_FILE.exists():
+        log.error("No config.json found. Copy config.example.json to config.json and fill it in.")
+        sys.exit(1)
+
     uvicorn.run(app, host="0.0.0.0", port=CLI_ARGS.port, log_level="warning")
 
 
