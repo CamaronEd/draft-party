@@ -184,6 +184,10 @@ async function playMoment(ev) {
 
   const backlog = queue.length;
   const cardOnly = backlog >= CARD_ONLY_AT || !(ev.player.videos || []).length;
+  // Compression only shortens the clip — it's the expensive part of the
+  // moment (16s vs. the card's 3.5s). Shrinking the card too used to make
+  // picks flash by too fast to even read the name during a burst, without
+  // meaningfully speeding up how fast the queue drains.
   const speed = backlog >= COMPRESS_AT ? 0.55 : 1;
 
   dom.idle.classList.add("hidden");
@@ -192,7 +196,7 @@ async function playMoment(ev) {
   dom.card.classList.remove("out");
 
   renderCard(ev);
-  await wait(CARD_MS * speed);
+  await wait(CARD_MS);
 
   if (!cardOnly) {
     videoCandidates = ev.player.videos || [];

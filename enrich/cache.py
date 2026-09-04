@@ -100,6 +100,14 @@ class HypeCache:
     def has(self, player_id: str) -> bool:
         return str(player_id) in self._cache
 
+    def has_videos(self, player_id: str) -> bool:
+        """True only if the cached entry actually has a clip. A player can be
+        `has()` (an entry exists) but still empty — a prior prewarm searched
+        and came up with nothing playable. `--missing` should retry those,
+        not treat an empty result as done forever."""
+        entry = self._cache.get(str(player_id))
+        return bool(entry and entry.get("videos"))
+
     @property
     def size(self) -> int:
         return len(self._cache)

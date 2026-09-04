@@ -133,10 +133,10 @@ async def broadcast(event: dict) -> None:
             queue.put_nowait(payload)
 
 
-async def handle_pick(pick: Pick, client: httpx.AsyncClient) -> None:
+async def build_pick_event(pick: Pick, client: httpx.AsyncClient) -> dict | None:
     player = await resolve_player(pick)
     if player is None:
-        return
+        return None
 
     hype: HypeCache = state["hype"]
     packet = await hype.build(player, client)
@@ -150,16 +150,30 @@ async def handle_pick(pick: Pick, client: httpx.AsyncClient) -> None:
         "player": packet,
     }
 
-    recent_picks.append(event)
-    del recent_picks[:-12]
-
     videos = len(packet.get("videos") or [])
     log.info(
         "PICK %s  %-24s %-4s %-3s  %s  [%d clip%s]",
         pick.label, player.name, player.position, player.team,
         pick.team_name, videos, "" if videos == 1 else "s",
     )
-    await broadcast(event)
+    return event
+
+
+async def handle_picks(picks: list[Pick], client: httpx.AsyncClient) -> None:
+    """Resolve every pick in a poll batch concurrently — an autodraft burst can
+    drop several picks in one 2s window, and each uncached lookup is a 1-2s
+    network round trip. Building them one at a time would serialize those
+    round trips and leave the display stalled well behind the live draft.
+    Broadcasting stays in draft order since gather() preserves input order."""
+    if not picks:
+        return
+    events = await asyncio.gather(*(build_pick_event(p, client) for p in picks))
+    for event in events:
+        if event is None:
+            continue
+        recent_picks.append(event)
+        del recent_picks[:-12]
+        await broadcast(event)
 
 
 async def poller() -> None:
@@ -174,8 +188,7 @@ async def poller() -> None:
     ) as client:
         while True:
             try:
-                for pick in await source.poll():
-                    await handle_pick(pick, client)
+                await handle_picks(await source.poll(), client)
                 if failures:
                     log.info("Draft connection recovered")
                     failures = 0

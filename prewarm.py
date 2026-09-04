@@ -53,13 +53,13 @@ async def main() -> None:
 
     targets = players.top_by_adp(args.top)
     if args.missing:
-        targets = [p for p in targets if not hype.has(p.player_id)]
+        targets = [p for p in targets if not hype.has_videos(p.player_id)]
 
     if not targets:
         print("Nothing to do — cache already covers the top", args.top)
         return
 
-    print(f"\nStep 1/2 — searching clips for {len(targets)} players "
+    print(f"\nStep 1/3 — searching clips for {len(targets)} players "
           f"(~{len(targets) * args.delay / 60:.1f} min)\n")
 
     try:
@@ -76,7 +76,7 @@ async def main() -> None:
     if results and not args.no_verify:
         if verify.available():
             found = sum(len(v) for v in results.values())
-            print(f"\nStep 2/2 — verifying {found} clips actually play "
+            print(f"\nStep 2/3 — verifying {found} clips actually play "
                   f"(this is the slow part; grab a drink)\n")
             try:
                 results = await verify.verify_batch(
@@ -91,6 +91,31 @@ async def main() -> None:
             results = {k: v[: args.keep] for k, v in results.items()}
     else:
         results = {k: v[: args.keep] for k, v in results.items()}
+
+    # A-list players are the likeliest to come up empty here: their search
+    # results skew toward tightly ContentID-monitored official/team broadcast
+    # channels, which block embedding almost across the board. A broader set
+    # of query phrasings (see build_queries) surfaces independent compilation
+    # channels the primary query misses — worth the extra searches since it's
+    # only run for the handful of players still empty.
+    still_empty = [p for p in targets if not results.get(p.player_id)]
+    if still_empty and not args.no_verify and verify.available():
+        print(f"\nStep 3/3 — widening the search for {len(still_empty)} player(s) still "
+              f"without a clip (likely stars whose top results are all embed-blocked)\n")
+        try:
+            widened = await find_videos_rate_limited(
+                still_empty, delay=args.delay, limit=max(args.candidates, 20), broaden=True
+            )
+        except KeyboardInterrupt:
+            print("\nInterrupted — saving what we have...")
+            widened = {}
+        if widened:
+            widened = await verify.verify_batch(
+                widened, keep=args.keep, concurrency=args.verify_jobs
+            )
+            for player_id, videos in widened.items():
+                if videos:
+                    results[player_id] = videos
 
     for player in targets:
         videos = results.get(player.player_id)
